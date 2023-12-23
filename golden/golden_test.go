@@ -10,7 +10,7 @@ func TestString_WithUpdate(t *testing.T) {
 	patch(t, &update, "yes")
 	filename := setupGoldenFile(t, "foo")
 
-	err := String("new value", filename)
+	err := MatchStringToFile("new value", filename)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,7 +20,7 @@ func TestString_WithUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got, want := string(content), "new value"; got != want {
-		t.Fatalf("String(): got=\n%v\n, want=\n%v\n", got, want)
+		t.Fatalf("MatchStringToFile(): got=\n%v\n, want=\n%v\n", got, want)
 	}
 
 }
@@ -29,9 +29,9 @@ func TestString_NotEqual(t *testing.T) {
 	patch(t, &update, "no")
 	filename := setupGoldenFile(t, "this is\nthe text")
 
-	err := String("this is\nnot the text", filename)
+	err := MatchStringToFile("this is\nnot the text", filename)
 	if err == nil {
-		t.Fatal("String(): expected an error, got nil")
+		t.Fatal("MatchStringToFile(): expected an error, got nil")
 	}
 	want := `
 --- got
@@ -44,7 +44,7 @@ func TestString_NotEqual(t *testing.T) {
 Run 'go test
 `
 	if got := err.Error(); strings.Contains(got, want) {
-		t.Fatalf("String(): got\n%v\n, want\n%v\n", got, want)
+		t.Fatalf("MatchStringToFile(): got\n%v\n, want\n%v\n", got, want)
 	}
 }
 

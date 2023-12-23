@@ -18,12 +18,13 @@ import (
 	"gotest.tools/v3/internal/format"
 )
 
-// String compares got to the contents of wantFile and returns nil if the
-// strings are equal, otherwise returns a unified diff of the values.
+// MatchStringToFile compares got to the contents of wantFile and returns nil if the
+// strings are equal, otherwise returns a unified diff of the values. Whitespace
+// only changes will be highlighted using visible characters.
 //
 // Running `go test pkgname -update` will write the value of actual
 // to the golden file.
-func String(got string, wantFilename string) error {
+func MatchStringToFile(got string, wantFilename string) error {
 	want, err := os.ReadFile(wantFilename)
 	if err != nil {
 		return fmt.Errorf("read wantFilename: %w", err)

@@ -62,7 +62,7 @@ func TestUnifiedDiff(t *testing.T) {
 			})
 
 			if testcase.expected != "" {
-				assert.Assert(t, golden.String(diff, testcase.expected))
+				assert.Assert(t, golden.MatchStringToFile(diff, testcase.expected))
 				return
 			}
 			assert.Equal(t, diff, "")
