@@ -26,22 +26,10 @@ type manifestResource interface {
 	SetGID(gid uint32)
 }
 
-type manifestFile interface {
-	manifestResource
-	SetContent(content io.ReadCloser)
-}
-
-type manifestDirectory interface {
-	manifestResource
-	AddSymlink(path, target string) error
-	AddFile(path string, ops ...PathOp) error
-	AddDirectory(path string, ops ...PathOp) error
-}
-
 // WithContent writes content to a file at [Path]
 func WithContent(content string) PathOp {
 	return func(path Path) error {
-		if m, ok := path.(manifestFile); ok {
+		if m, ok := path.(*filePath); ok {
 			m.SetContent(io.NopCloser(strings.NewReader(content)))
 			return nil
 		}
@@ -52,7 +40,7 @@ func WithContent(content string) PathOp {
 // WithBytes write bytes to a file at [Path]
 func WithBytes(raw []byte) PathOp {
 	return func(path Path) error {
-		if m, ok := path.(manifestFile); ok {
+		if m, ok := path.(*filePath); ok {
 			m.SetContent(io.NopCloser(bytes.NewReader(raw)))
 			return nil
 		}
@@ -63,7 +51,7 @@ func WithBytes(raw []byte) PathOp {
 // WithReaderContent copies the reader contents to the file at [Path]
 func WithReaderContent(r io.Reader) PathOp {
 	return func(path Path) error {
-		if m, ok := path.(manifestFile); ok {
+		if m, ok := path.(*filePath); ok {
 			m.SetContent(io.NopCloser(r))
 			return nil
 		}
@@ -92,7 +80,7 @@ func AsUser(uid, gid int) PathOp {
 // WithFile creates a file in the directory at path with content
 func WithFile(filename, content string, ops ...PathOp) PathOp {
 	return func(path Path) error {
-		if m, ok := path.(manifestDirectory); ok {
+		if m, ok := path.(*directoryPath); ok {
 			ops = append([]PathOp{WithContent(content), WithMode(defaultFileMode)}, ops...)
 			return m.AddFile(filename, ops...)
 		}
@@ -112,7 +100,7 @@ func createFile(fullpath string, content string) error {
 // WithFiles creates all the files in the directory at path with their content
 func WithFiles(files map[string]string) PathOp {
 	return func(path Path) error {
-		if m, ok := path.(manifestDirectory); ok {
+		if m, ok := path.(*directoryPath); ok {
 			for filename, content := range files {
 				// TODO: remove duplication with WithFile
 				if err := m.AddFile(filename, WithContent(content), WithMode(defaultFileMode)); err != nil {
@@ -135,7 +123,7 @@ func WithFiles(files map[string]string) PathOp {
 // FromDir copies the directory tree from the source path into the new [Dir]
 func FromDir(source string) PathOp {
 	return func(path Path) error {
-		if _, ok := path.(manifestDirectory); ok {
+		if _, ok := path.(*directoryPath); ok {
 			return fmt.Errorf("use manifest.FromDir")
 		}
 		return copyDirectory(source, path.Path())
@@ -147,7 +135,7 @@ func FromDir(source string) PathOp {
 func WithDir(name string, ops ...PathOp) PathOp {
 	const defaultMode = 0755
 	return func(path Path) error {
-		if m, ok := path.(manifestDirectory); ok {
+		if m, ok := path.(*directoryPath); ok {
 			ops = append([]PathOp{WithMode(defaultMode)}, ops...)
 			return m.AddDirectory(name, ops...)
 		}
@@ -245,7 +233,7 @@ func copyFile(source, dest string) error {
 // the other functions in this package.
 func WithSymlink(path, target string) PathOp {
 	return func(root Path) error {
-		if v, ok := root.(manifestDirectory); ok {
+		if v, ok := root.(*directoryPath); ok {
 			return v.AddSymlink(path, target)
 		}
 		return os.Symlink(filepath.Join(root.Path(), target), filepath.Join(root.Path(), path))
@@ -259,7 +247,7 @@ func WithSymlink(path, target string) PathOp {
 // the other functions in this package.
 func WithHardlink(path, target string) PathOp {
 	return func(root Path) error {
-		if _, ok := root.(manifestDirectory); ok {
+		if _, ok := root.(*directoryPath); ok {
 			return fmt.Errorf("WithHardlink not implemented for manifests")
 		}
 		return os.Link(filepath.Join(root.Path(), target), filepath.Join(root.Path(), path))
@@ -270,7 +258,7 @@ func WithHardlink(path, target string) PathOp {
 // at path.
 func WithTimestamps(atime, mtime time.Time) PathOp {
 	return func(root Path) error {
-		if _, ok := root.(manifestDirectory); ok {
+		if _, ok := root.(*directoryPath); ok {
 			return fmt.Errorf("WithTimestamp not implemented for manifests")
 		}
 		return os.Chtimes(root.Path(), atime, mtime)
