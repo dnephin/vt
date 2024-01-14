@@ -129,7 +129,7 @@ func WithFiles(files map[string]string) DirOp {
 }
 
 // FromDir copies the directory tree from the source path into the new [Dir]
-func FromDir(source string) PathOp {
+func FromDir(source string) DirOp {
 	return func(path Path) error {
 		if _, ok := path.(*directoryPath); ok {
 			return fmt.Errorf("use manifest.FromDir")
@@ -140,7 +140,7 @@ func FromDir(source string) PathOp {
 
 // WithDir creates a subdirectory in the directory at path. Additional [PathOp]
 // can be used to modify the subdirectory
-func WithDir(name string, ops ...PathOp) PathOp {
+func WithDir(name string, ops ...PathOp) DirOp {
 	const defaultMode = 0755
 	return func(path Path) error {
 		if m, ok := path.(*directoryPath); ok {
@@ -239,7 +239,7 @@ func copyFile(source, dest string) error {
 //
 // Note: the argument order is the inverse of [os.Symlink] to be consistent with
 // the other functions in this package.
-func WithSymlink(path, target string) PathOp {
+func WithSymlink(path, target string) DirOp {
 	return func(root Path) error {
 		if v, ok := root.(*directoryPath); ok {
 			return v.AddSymlink(path, target)
@@ -253,7 +253,7 @@ func WithSymlink(path, target string) PathOp {
 //
 // Note: the argument order is the inverse of [os.Link] to be consistent with
 // the other functions in this package.
-func WithHardlink(path, target string) PathOp {
+func WithHardlink(path, target string) DirOp {
 	return func(root Path) error {
 		if _, ok := root.(*directoryPath); ok {
 			return fmt.Errorf("WithHardlink not implemented for manifests")
