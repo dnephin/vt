@@ -1,4 +1,4 @@
-package vt
+package tma
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ type msgResult struct {
 
 func Got(got any) string {
 	// TODO colorize when in supported terminal
-	const vtFuncName = "vt.Got"
+	const vtFuncName = "tma.Got"
 
 	result := msgResult{got: got, vtFuncName: vtFuncName}
 
@@ -49,7 +49,7 @@ func Got(got any) string {
 
 func GotWant(got any, want any) string {
 	// TODO colorize when in supported terminal
-	const vtFuncName = "vt.GotWant"
+	const vtFuncName = "tma.GotWant"
 
 	result := msgResult{got: got}
 	callSource, err := getCallSource()

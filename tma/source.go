@@ -1,4 +1,4 @@
-package vt
+package tma
 
 import (
 	"bytes"
@@ -117,7 +117,7 @@ func scanToLine(src fileSource, lineNum int) messageCallSource {
 		if !ok {
 			return true
 		}
-		if x.Name != "vt" {
+		if x.Name != "tma" {
 			return true
 		}
 

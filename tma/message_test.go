@@ -1,4 +1,4 @@
-package vt_test
+package tma_test
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/dnephin/vt/table"
-	"github.com/dnephin/vt/vt"
+	"github.com/dnephin/vt/tma"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -48,7 +48,7 @@ func TestGot(t *testing.T) {
 			id: table.ID("err != nil assigned from function in if block"),
 			fn: func(t *testing.T) {
 				if err := someFunc("arga"); err != nil {
-					ft.Fatal(vt.Got(err))
+					ft.Fatal(tma.Got(err))
 				}
 			},
 			want: `someFunc("arga") returned error: failed to do something`,
@@ -58,7 +58,7 @@ func TestGot(t *testing.T) {
 			fn: func(t *testing.T) {
 				err := someFunc("arga")
 				if err != nil {
-					ft.Fatal(vt.Got(err))
+					ft.Fatal(tma.Got(err))
 				}
 			},
 			want: `someFunc("arga") returned error: failed to do something`,
@@ -68,7 +68,7 @@ func TestGot(t *testing.T) {
 			fn: func(t *testing.T) {
 				var err = someFunc("arga")
 				if err != nil {
-					ft.Fatal(vt.Got(err))
+					ft.Fatal(tma.Got(err))
 				}
 			},
 			want: `someFunc("arga") returned error: failed to do something`,
@@ -80,7 +80,7 @@ func TestGot(t *testing.T) {
 
 				err := someFunc("arga")
 				if !errors.Is(err, errSentinel) {
-					ft.Fatal(vt.Got(err))
+					ft.Fatal(tma.Got(err))
 				}
 			},
 			want: `someFunc("arga") returned error: failed to do something, wanted errSentinel`,
@@ -91,7 +91,7 @@ func TestGot(t *testing.T) {
 				err := someFunc("arga")
 				typedErr := &ErrorType{}
 				if !errors.As(err, &typedErr) {
-					ft.Error(vt.Got(err))
+					ft.Error(tma.Got(err))
 				}
 			},
 			want: `someFunc("arga") returned error: failed to do something (*errors.errorString), wanted ErrorType`,
@@ -106,7 +106,7 @@ func TestGot(t *testing.T) {
 				got := doAThing()
 
 				if diff := cmp.Diff(got, want); diff != "" {
-					ft.Fatal(vt.Got(diff))
+					ft.Fatal(tma.Got(diff))
 				}
 			},
 			wantPrefix: "doAThing() returned a different result (-got +want):\n",
@@ -115,7 +115,7 @@ func TestGot(t *testing.T) {
 			id: table.ID("err != nil with comments"),
 			fn: func(t *testing.T) {
 				if err := someFunc("arga"); err != nil {
-					ft.Fatal(vt.Got(err)) // some was not available
+					ft.Fatal(tma.Got(err)) // some was not available
 				}
 			},
 			want: `someFunc("arga") returned error: failed to do something
