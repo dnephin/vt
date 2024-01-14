@@ -50,7 +50,7 @@ func ExampleEqual() {
 			fs.WithBytes([]byte("content")),
 			fs.WithMode(0600)),
 		fs.WithDir("data",
-			fs.WithFile("config", "", fs.MatchAnyFileContent)))
+			fs.WithFile("config", "", fs.MatchAnyFileContent())))
 
 	assert.Assert(t, fs.PathMatchesManifest(path, expected))
 }

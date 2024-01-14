@@ -127,31 +127,37 @@ var anyFileContent = io.NopCloser(bytes.NewReader(nil))
 
 // MatchAnyFileContent is a [PathOp] that updates a [Manifest] so that the file
 // at path may contain any content.
-func MatchAnyFileContent(path Path) error {
-	if m, ok := path.(*filePath); ok {
-		m.SetContent(anyFileContent)
+func MatchAnyFileContent() FileOp {
+	return func(path Path) error {
+		if m, ok := path.(*filePath); ok {
+			m.SetContent(anyFileContent)
+		}
+		return nil
 	}
-	return nil
 }
 
 // MatchContentIgnoreCarriageReturn is a [PathOp] that ignores cariage return
 // discrepancies.
-func MatchContentIgnoreCarriageReturn(path Path) error {
-	if m, ok := path.(*filePath); ok {
-		m.file.ignoreCariageReturn = true
+func MatchContentIgnoreCarriageReturn() FileOp {
+	return func(path Path) error {
+		if m, ok := path.(*filePath); ok {
+			m.file.ignoreCariageReturn = true
+		}
+		return nil
 	}
-	return nil
 }
 
 const anyFile = "*"
 
 // MatchExtraFiles is a [PathOp] that updates a [Manifest] to allow a directory
 // to contain unspecified files.
-func MatchExtraFiles(path Path) error {
-	if m, ok := path.(*directoryPath); ok {
-		return m.AddFile(anyFile)
+func MatchExtraFiles() DirOp {
+	return func(path Path) error {
+		if m, ok := path.(*directoryPath); ok {
+			return m.AddFile(anyFile)
+		}
+		return nil
 	}
-	return nil
 }
 
 // CompareResult is the result of comparison.
@@ -165,7 +171,7 @@ type CompareResult interface {
 
 // MatchFileContent is a [PathOp] that updates a [Manifest] to use the provided
 // function to determine if a file's content matches the expectation.
-func MatchFileContent(f func([]byte) CompareResult) PathOp {
+func MatchFileContent(f func([]byte) CompareResult) FileOp {
 	return func(path Path) error {
 		if m, ok := path.(*filePath); ok {
 			m.file.compareContentFunc = f
@@ -176,7 +182,7 @@ func MatchFileContent(f func([]byte) CompareResult) PathOp {
 
 // MatchFilesWithGlob is a [PathOp] that updates a [Manifest] to match files using
 // glob pattern, and check them using the ops.
-func MatchFilesWithGlob(glob string, ops ...PathOp) PathOp {
+func MatchFilesWithGlob(glob string, ops ...PathOp) DirOp {
 	return func(path Path) error {
 		if m, ok := path.(*directoryPath); ok {
 			return m.AddGlobFiles(glob, ops...)
@@ -190,9 +196,11 @@ const anyFileMode os.FileMode = 4294967295
 
 // MatchAnyFileMode is a [PathOp] that updates a [Manifest] so that the resource at path
 // will match any file mode.
-func MatchAnyFileMode(path Path) error {
-	if m, ok := path.(manifestResource); ok {
-		m.SetMode(anyFileMode)
+func MatchAnyFileMode() PathOp {
+	return func(path Path) error {
+		if m, ok := path.(manifestResource); ok {
+			m.SetMode(anyFileMode)
+		}
+		return nil
 	}
-	return nil
 }

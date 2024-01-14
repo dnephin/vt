@@ -14,6 +14,14 @@ import (
 
 const defaultFileMode = 0644
 
+// DirOp is a function that modifies a directory or the [Manifest] entry for a directory.
+// See [PathOp].
+type DirOp = PathOp
+
+// FileOp is a function that modifies a file or the [Manifest] entry for a file.
+// See [PathOp].
+type FileOp = PathOp
+
 // PathOp is a function which accepts a [Path] and performs an operation on that
 // path. When called with real filesystem objects ([File] or [Dir]) a PathOp modifies
 // the filesystem at the path. When used with a [Manifest] object a PathOp updates
@@ -27,7 +35,7 @@ type manifestResource interface {
 }
 
 // WithContent writes content to a file at [Path]
-func WithContent(content string) PathOp {
+func WithContent(content string) FileOp {
 	return func(path Path) error {
 		if m, ok := path.(*filePath); ok {
 			m.SetContent(io.NopCloser(strings.NewReader(content)))
@@ -38,7 +46,7 @@ func WithContent(content string) PathOp {
 }
 
 // WithBytes write bytes to a file at [Path]
-func WithBytes(raw []byte) PathOp {
+func WithBytes(raw []byte) FileOp {
 	return func(path Path) error {
 		if m, ok := path.(*filePath); ok {
 			m.SetContent(io.NopCloser(bytes.NewReader(raw)))
@@ -49,7 +57,7 @@ func WithBytes(raw []byte) PathOp {
 }
 
 // WithReaderContent copies the reader contents to the file at [Path]
-func WithReaderContent(r io.Reader) PathOp {
+func WithReaderContent(r io.Reader) FileOp {
 	return func(path Path) error {
 		if m, ok := path.(*filePath); ok {
 			m.SetContent(io.NopCloser(r))
@@ -78,7 +86,7 @@ func AsUser(uid, gid int) PathOp {
 }
 
 // WithFile creates a file in the directory at path with content
-func WithFile(filename, content string, ops ...PathOp) PathOp {
+func WithFile(filename, content string, ops ...PathOp) DirOp {
 	return func(path Path) error {
 		if m, ok := path.(*directoryPath); ok {
 			ops = append([]PathOp{WithContent(content), WithMode(defaultFileMode)}, ops...)
@@ -98,7 +106,7 @@ func createFile(fullpath string, content string) error {
 }
 
 // WithFiles creates all the files in the directory at path with their content
-func WithFiles(files map[string]string) PathOp {
+func WithFiles(files map[string]string) DirOp {
 	return func(path Path) error {
 		if m, ok := path.(*directoryPath); ok {
 			for filename, content := range files {

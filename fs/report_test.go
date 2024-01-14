@@ -9,7 +9,6 @@ import (
 
 	"gotest.tools/v3/assert"
 	is "gotest.tools/v3/assert/cmp"
-	"gotest.tools/v3/skip"
 )
 
 func assertNotNil(t *testing.T, err error) {
@@ -93,7 +92,7 @@ func TestEqualWithMatchAnyFileContent(t *testing.T) {
 	defer dir.Remove()
 
 	expected := Expected(t,
-		WithFile("data", "different content", MatchAnyFileContent))
+		WithFile("data", "different content", MatchAnyFileContent()))
 	assert.Assert(t, PathMatchesManifest(dir.Path(), expected))
 }
 
@@ -125,7 +124,7 @@ func TestEqualWithMatchContentIgnoreCarriageReturn(t *testing.T) {
 	defer dir.Remove()
 
 	manifest := Expected(t,
-		WithFile("file1", "line1\nline2", MatchContentIgnoreCarriageReturn))
+		WithFile("file1", "line1\nline2", MatchContentIgnoreCarriageReturn()))
 
 	result := PathMatchesManifest(dir.Path(), manifest)
 	assert.Assert(t, result == nil)
@@ -138,7 +137,7 @@ func TestEqualDirectoryWithMatchExtraFiles(t *testing.T) {
 		WithFile("extra", "some content"))
 	defer dir.Remove()
 
-	expected := Expected(t, file1, MatchExtraFiles)
+	expected := Expected(t, file1, MatchExtraFiles())
 	assert.Assert(t, PathMatchesManifest(dir.Path(), expected))
 }
 
@@ -184,7 +183,7 @@ func TestMatchAnyFileMode(t *testing.T) {
 	defer dir.Remove()
 
 	expected := Expected(t,
-		WithFile("data", "content", MatchAnyFileMode))
+		WithFile("data", "content", MatchAnyFileMode()))
 	assert.Assert(t, PathMatchesManifest(dir.Path(), expected))
 }
 
@@ -228,16 +227,18 @@ func TestMatchExtraFilesGlob(t *testing.T) {
 
 	t.Run("matching globs", func(t *testing.T) {
 		manifest := Expected(t,
-			MatchFilesWithGlob("*.go", MatchAnyFileMode, MatchAnyFileContent),
-			MatchFilesWithGlob("*.yml", MatchAnyFileMode, MatchAnyFileContent))
+			MatchFilesWithGlob("*.go", MatchAnyFileMode(), MatchAnyFileContent()),
+			MatchFilesWithGlob("*.yml", MatchAnyFileMode(), MatchAnyFileContent()))
 		assert.Assert(t, PathMatchesManifest(dir.Path(), manifest))
 	})
 
 	t.Run("matching globs with wrong mode", func(t *testing.T) {
-		skip.If(t, runtime.GOOS == "windows", "expect mode does not match on windows")
+		if runtime.GOOS == "windows" {
+			t.Skip("expect mode does not match on windows")
+		}
 		manifest := Expected(t,
-			MatchFilesWithGlob("*.go", MatchAnyFileMode, MatchAnyFileContent),
-			MatchFilesWithGlob("*.yml", MatchAnyFileContent, WithMode(0700)))
+			MatchFilesWithGlob("*.go", MatchAnyFileMode(), MatchAnyFileContent()),
+			MatchFilesWithGlob("*.yml", MatchAnyFileContent(), WithMode(0700)))
 
 		result := PathMatchesManifest(dir.Path(), manifest)
 
@@ -250,7 +251,7 @@ conf.yml
 	})
 
 	t.Run("matching partial glob", func(t *testing.T) {
-		manifest := Expected(t, MatchFilesWithGlob("*.go", MatchAnyFileMode, MatchAnyFileContent))
+		manifest := Expected(t, MatchFilesWithGlob("*.go", MatchAnyFileMode(), MatchAnyFileContent()))
 		result := PathMatchesManifest(dir.Path(), manifest)
 		assertNotNil(t, result)
 
