@@ -8,8 +8,6 @@ import (
 
 	"gotest.tools/v3/assert"
 	"gotest.tools/v3/fs"
-	"gotest.tools/v3/internal/source"
-	"gotest.tools/v3/skip"
 )
 
 func TestNewDirWithOpsAndManifestEqual(t *testing.T) {
@@ -66,7 +64,6 @@ func TestNewFile(t *testing.T) {
 }
 
 func TestNewFile_IntegrationWithCleanup(t *testing.T) {
-	skip.If(t, source.GoVersionLessThan(1, 14))
 	var tmpFile *fs.File
 	t.Run("cleanup in subtest", func(t *testing.T) {
 		tmpFile = fs.NewFile(t, t.Name())
@@ -81,7 +78,6 @@ func TestNewFile_IntegrationWithCleanup(t *testing.T) {
 }
 
 func TestNewDir_IntegrationWithCleanup(t *testing.T) {
-	skip.If(t, source.GoVersionLessThan(1, 14))
 	var tmpFile *fs.Dir
 	t.Run("cleanup in subtest", func(t *testing.T) {
 		tmpFile = fs.NewDir(t, t.Name())
