@@ -6,13 +6,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dnephin/vt/table"
 	"github.com/dnephin/vt/vt"
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestGot(t *testing.T) {
 	type testCase struct {
-		id         vt.TestID
+		id         table.TestID
 		fn         func(t *testing.T)
 		want       string
 		wantPrefix string
@@ -44,7 +45,7 @@ func TestGot(t *testing.T) {
 
 	testCases := []testCase{
 		{
-			id: vt.ID("err != nil assigned from function in if block"),
+			id: table.ID("err != nil assigned from function in if block"),
 			fn: func(t *testing.T) {
 				if err := someFunc("arga"); err != nil {
 					ft.Fatal(vt.Got(err))
@@ -53,7 +54,7 @@ func TestGot(t *testing.T) {
 			want: `someFunc("arga") returned error: failed to do something`,
 		},
 		{
-			id: vt.ID("err != nil assigned from function"),
+			id: table.ID("err != nil assigned from function"),
 			fn: func(t *testing.T) {
 				err := someFunc("arga")
 				if err != nil {
@@ -63,7 +64,7 @@ func TestGot(t *testing.T) {
 			want: `someFunc("arga") returned error: failed to do something`,
 		},
 		{
-			id: vt.ID("err != nil declared from function"),
+			id: table.ID("err != nil declared from function"),
 			fn: func(t *testing.T) {
 				var err = someFunc("arga")
 				if err != nil {
@@ -73,7 +74,7 @@ func TestGot(t *testing.T) {
 			want: `someFunc("arga") returned error: failed to do something`,
 		},
 		{
-			id: vt.ID("errors.Is"),
+			id: table.ID("errors.Is"),
 			fn: func(t *testing.T) {
 				var errSentinel = fmt.Errorf("some text")
 
@@ -85,7 +86,7 @@ func TestGot(t *testing.T) {
 			want: `someFunc("arga") returned error: failed to do something, wanted errSentinel`,
 		},
 		{
-			id: vt.ID("errors.As"),
+			id: table.ID("errors.As"),
 			fn: func(t *testing.T) {
 				err := someFunc("arga")
 				typedErr := &ErrorType{}
@@ -96,7 +97,7 @@ func TestGot(t *testing.T) {
 			want: `someFunc("arga") returned error: failed to do something (*errors.errorString), wanted ErrorType`,
 		},
 		{
-			id: vt.ID("cmp.Diff"),
+			id: table.ID("cmp.Diff"),
 			fn: func(t *testing.T) {
 				doAThing := func() string {
 					return "the actual value"
@@ -111,7 +112,7 @@ func TestGot(t *testing.T) {
 			wantPrefix: "doAThing() returned a different result (-got +want):\n",
 		},
 		{
-			id: vt.ID("err != nil with comments"),
+			id: table.ID("err != nil with comments"),
 			fn: func(t *testing.T) {
 				if err := someFunc("arga"); err != nil {
 					ft.Fatal(vt.Got(err)) // some was not available

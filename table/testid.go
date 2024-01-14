@@ -1,4 +1,4 @@
-package vt
+package table
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 // in most IDE.
 //
 //	type testCase struct {
-//		id vt.TestID
+//		id table.TestID
 //		...
 //	}
 //
