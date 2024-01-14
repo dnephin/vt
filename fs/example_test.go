@@ -4,9 +4,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/dnephin/vt/fs"
 	"gotest.tools/v3/assert"
 	"gotest.tools/v3/assert/cmp"
-	"gotest.tools/v3/fs"
 )
 
 var t = &testing.T{}

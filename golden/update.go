@@ -46,3 +46,9 @@ func (u *updateValue) Requested(gotHash string) bool {
 	fmt.Printf("Refusing to update because the hash %v did not match the actual value hash %v\n", *u, gotHash)
 	return false
 }
+
+// Get provides compatibility with other libraries that define
+// an optional bool flag for -update.
+func (u *updateValue) Get() any {
+	return u.Requested("")
+}

@@ -3,8 +3,8 @@ package format_test
 import (
 	"testing"
 
+	"github.com/dnephin/vt/internal/format"
 	"gotest.tools/v3/assert"
-	"gotest.tools/v3/internal/format"
 )
 
 func TestMessage(t *testing.T) {

@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/dnephin/vt/fs"
 	"gotest.tools/v3/assert"
-	"gotest.tools/v3/fs"
 )
 
 func TestNewDirWithOpsAndManifestEqual(t *testing.T) {

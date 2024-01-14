@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"gotest.tools/v3/poll"
+	"github.com/dnephin/vt/poll"
 )
 
 var t poll.TestingT

@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dnephin/vt/internal/maint"
 	"gotest.tools/v3/assert"
 	"gotest.tools/v3/fs"
-	"gotest.tools/v3/internal/maint"
 )
 
 var (

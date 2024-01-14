@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dnephin/vt/fs"
 	"gotest.tools/v3/assert"
-	"gotest.tools/v3/fs"
 )
 
 func TestFromDir(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	"gotest.tools/v3/internal/format"
+	"github.com/dnephin/vt/internal/format"
 )
 
 // PathMatchesManifest compares the directory at path to the expected structured

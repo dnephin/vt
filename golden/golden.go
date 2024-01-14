@@ -15,7 +15,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"gotest.tools/v3/internal/format"
+	"github.com/dnephin/vt/internal/format"
 )
 
 // MatchStringToFile compares got to the contents of wantFile and returns nil if the

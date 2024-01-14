@@ -1,11 +1,12 @@
 package format_test
 
 import (
+	"path/filepath"
 	"testing"
 
+	"github.com/dnephin/vt/golden"
+	"github.com/dnephin/vt/internal/format"
 	"gotest.tools/v3/assert"
-	"gotest.tools/v3/golden"
-	"gotest.tools/v3/internal/format"
 )
 
 func TestUnifiedDiff(t *testing.T) {
@@ -62,7 +63,8 @@ func TestUnifiedDiff(t *testing.T) {
 			})
 
 			if testcase.expected != "" {
-				assert.Assert(t, golden.MatchStringToFile(diff, testcase.expected))
+				want := filepath.Join("testdata", testcase.expected)
+				assert.Assert(t, golden.MatchStringToFile(diff, want))
 				return
 			}
 			assert.Equal(t, diff, "")

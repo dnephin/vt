@@ -1,10 +1,11 @@
-/*Package difflib is a partial port of Python difflib module.
+/*
+Package difflib is a partial port of Python difflib module.
 
 Original source: https://github.com/pmezard/go-difflib
 
 This file is trimmed to only the parts used by this repository.
 */
-package difflib // import "gotest.tools/v3/internal/difflib"
+package difflib
 
 func min(a, b int) int {
 	if a < b {
@@ -170,12 +171,15 @@ func (m *SequenceMatcher) isBJunk(s string) bool {
 // If IsJunk is not defined:
 //
 // Return (i,j,k) such that a[i:i+k] is equal to b[j:j+k], where
-//     alo <= i <= i+k <= ahi
-//     blo <= j <= j+k <= bhi
+//
+//	alo <= i <= i+k <= ahi
+//	blo <= j <= j+k <= bhi
+//
 // and for all (i',j',k') meeting those conditions,
-//     k >= k'
-//     i <= i'
-//     and if i == i', j <= j'
+//
+//	k >= k'
+//	i <= i'
+//	and if i == i', j <= j'
 //
 // In other words, of all maximal matching blocks, return one that
 // starts earliest in a, and of all those maximal matching blocks that

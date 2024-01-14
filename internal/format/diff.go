@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode"
 
-	"gotest.tools/v3/internal/difflib"
+	"github.com/dnephin/vt/internal/difflib"
 )
 
 const (

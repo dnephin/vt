@@ -2,7 +2,7 @@
 Package fs provides tools for creating temporary files, and testing the
 contents and structure of a directory.
 */
-package fs // import "gotest.tools/v3/fs"
+package fs
 
 import (
 	"os"
@@ -10,8 +10,8 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/dnephin/vt/internal/cleanup"
 	"gotest.tools/v3/assert"
-	"gotest.tools/v3/internal/cleanup"
 )
 
 // Path objects return their filesystem path. Path may be implemented by a
