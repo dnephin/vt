@@ -24,7 +24,7 @@ func TestFromDir(t *testing.T) {
 			fs.WithDir("b",
 				fs.WithFile("1", "1\n"))))
 
-	assert.Assert(t, fs.Equal(dir.Path(), expected))
+	assert.Assert(t, fs.PathMatchesManifest(dir.Path(), expected))
 }
 
 func TestFromDirSymlink(t *testing.T) {
@@ -52,7 +52,7 @@ func TestFromDirSymlink(t *testing.T) {
 				fs.WithSymlink("4", "5"),
 			)))
 
-	assert.Assert(t, fs.Equal(dir.Path(), expected))
+	assert.Assert(t, fs.PathMatchesManifest(dir.Path(), expected))
 }
 
 func TestWithTimestamps(t *testing.T) {
@@ -83,7 +83,7 @@ func TestApply(t *testing.T) {
 		expected := fs.Expected(t,
 			fs.WithFile("file1", "contenta"),
 			fs.WithFile("file2", "contentb"))
-		assert.Assert(t, fs.Equal(tmpDir.Path(), expected))
+		assert.Assert(t, fs.PathMatchesManifest(tmpDir.Path(), expected))
 	})
 }
 
@@ -95,5 +95,5 @@ func TestWithReaderContent(t *testing.T) {
 	)
 	defer dir.Remove()
 	expected := fs.Expected(t, fs.WithFile("1", content))
-	assert.Assert(t, fs.Equal(dir.Path(), expected))
+	assert.Assert(t, fs.PathMatchesManifest(dir.Path(), expected))
 }

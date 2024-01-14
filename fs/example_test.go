@@ -7,7 +7,6 @@ import (
 	"gotest.tools/v3/assert"
 	"gotest.tools/v3/assert/cmp"
 	"gotest.tools/v3/fs"
-	"gotest.tools/v3/golden"
 )
 
 var t = &testing.T{}
@@ -48,12 +47,12 @@ func ExampleEqual() {
 	path := operationWhichCreatesFiles()
 	expected := fs.Expected(t,
 		fs.WithFile("one", "",
-			fs.WithBytes(golden.Get(t, "one.golden")),
+			fs.WithBytes([]byte("content")),
 			fs.WithMode(0600)),
 		fs.WithDir("data",
 			fs.WithFile("config", "", fs.MatchAnyFileContent)))
 
-	assert.Assert(t, fs.Equal(path, expected))
+	assert.Assert(t, fs.PathMatchesManifest(path, expected))
 }
 
 func operationWhichCreatesFiles() string {

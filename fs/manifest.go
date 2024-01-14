@@ -57,7 +57,7 @@ type dirEntry interface {
 
 // ManifestFromDir creates a [Manifest] by reading the directory at path. The
 // manifest stores the structure and properties of files in the directory.
-// ManifestFromDir can be used with [Equal] to compare two directories.
+// ManifestFromDir can be used with [PathMatchesManifest] to compare two directories.
 func ManifestFromDir(t assert.TestingT, path string) Manifest {
 	if ht, ok := t.(helperT); ok {
 		ht.Helper()

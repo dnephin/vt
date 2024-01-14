@@ -10,29 +10,26 @@ import (
 	"sort"
 	"strings"
 
-	"gotest.tools/v3/assert/cmp"
 	"gotest.tools/v3/internal/format"
 )
 
-// Equal compares a directory to the expected structured described by a manifest
-// and returns success if they match. If they do not match the failure message
-// will contain all the differences between the directory structure and the
-// expected structure defined by the [Manifest].
-//
-// Equal is a [cmp.Comparison] which can be used with [gotest.tools/v3/assert.Assert].
-func Equal(path string, expected Manifest) cmp.Comparison {
-	return func() cmp.Result {
-		actual, err := manifestFromDir(path)
-		if err != nil {
-			return cmp.ResultFromError(err)
-		}
-		failures := eqDirectory(string(os.PathSeparator), expected.root, actual.root)
-		if len(failures) == 0 {
-			return cmp.ResultSuccess
-		}
-		msg := fmt.Sprintf("directory %s does not match expected:\n", path)
-		return cmp.ResultFailure(msg + formatFailures(failures))
+// PathMatchesManifest compares the directory at path to the expected structured
+// described by a manifest. If they do not match the error will contain all the
+// differences between the directory structure and the expected structure defined
+// by the [Manifest].
+func PathMatchesManifest(path string, want Manifest) error {
+	actual, err := manifestFromDir(path)
+	if err != nil {
+		// TODO: more error context
+		return err
 	}
+	failures := eqDirectory(string(os.PathSeparator), want.root, actual.root)
+	if len(failures) == 0 {
+		return nil
+	}
+	// TODO: common error type
+	return fmt.Errorf("directory %s does not match the manifest:\n%s",
+		path, formatFailures(failures))
 }
 
 type failure struct {

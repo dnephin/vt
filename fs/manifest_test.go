@@ -82,7 +82,7 @@ func TestSymlinks(t *testing.T) {
 	expected := Expected(t,
 		WithFile("foo.txt", "foo"),
 		WithSymlink("foo.link", rootDirectory.Join("foo.txt")))
-	assert.Assert(t, Equal(rootDirectory.Path(), expected))
+	assert.Assert(t, PathMatchesManifest(rootDirectory.Path(), expected))
 }
 
 var cmpManifest = cmp.Options{
