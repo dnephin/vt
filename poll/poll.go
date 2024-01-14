@@ -24,13 +24,15 @@ type delayKeyType struct{}
 
 var delayKey = delayKeyType{}
 
-func WithDelay(ctx context.Context, delay time.Duration) context.Context {
+// WaitWithDelay sets the time that [WaitOn] will sleep between calls to check.
+// Pass the returned context to [WaitOn].
+func WaitWithDelay(ctx context.Context, delay time.Duration) context.Context {
 	return context.WithValue(ctx, delayKey, delay)
 }
 
 // WaitOn calls check until it returns non-nil error that is not [Continue], or
 // the timeout has elapsed. WaitOn sleeps between each call.
-// A timeout can be set on the context, and a delay can be set with [WithDelay].
+// A timeout can be set on the context, and a delay can be set with [WaitWithDelay].
 // WaitOn defaults to a 10s timeout and 100ms delay.
 //
 // The test is failed with [t.FailNow] If WaitOn reaches the timeout, or a non-nil

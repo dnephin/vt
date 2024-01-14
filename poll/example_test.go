@@ -44,7 +44,7 @@ func ExampleSettingOp() {
 		return poll.Continue(fmt.Errorf("state is: %s", getState()))
 	}
 
-	ctx := poll.WithDelay(context.Background(), 33*time.Millisecond)
+	ctx := poll.WaitWithDelay(context.Background(), 33*time.Millisecond)
 	ctx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
 
