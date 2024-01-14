@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"gotest.tools/v3/assert"
-	is "gotest.tools/v3/assert/cmp"
 )
 
 func assertNotNil(t *testing.T, err error) {
@@ -19,7 +18,7 @@ func assertNotNil(t *testing.T, err error) {
 }
 
 func TestEqualMissingRoot(t *testing.T) {
-	err := PathMatchesManifest("/bogus/path/does/not/exist", Expected(t))
+	err := PathMatchesManifest("/bogus/path/does/not/exist", NewManifest(t))
 	assertNotNil(t, err)
 	expected := "stat /bogus/path/does/not/exist: no such file or directory"
 	if runtime.GOOS == "windows" {
@@ -34,7 +33,7 @@ func TestEqualModeMismatch(t *testing.T) {
 	dir := NewDir(t, t.Name(), WithMode(0500))
 	defer dir.Remove()
 
-	result := PathMatchesManifest(dir.Path(), Expected(t))
+	result := PathMatchesManifest(dir.Path(), NewManifest(t))
 	assertNotNil(t, result)
 	expected := fmtExpected(`directory %s does not match the manifest:
 /
@@ -53,7 +52,7 @@ func TestEqualRootIsAFile(t *testing.T) {
 	file := NewFile(t, t.Name())
 	defer file.Remove()
 
-	result := PathMatchesManifest(file.Path(), Expected(t))
+	result := PathMatchesManifest(file.Path(), NewManifest(t))
 	assertNotNil(t, result)
 	expected := fmt.Sprintf("path %s must be a directory", file.Path())
 	assert.Equal(t, result.Error(), expected)
@@ -63,7 +62,7 @@ func TestEqualSuccess(t *testing.T) {
 	dir := NewDir(t, t.Name(), WithMode(0700))
 	defer dir.Remove()
 
-	assert.Assert(t, PathMatchesManifest(dir.Path(), Expected(t)))
+	assert.Assert(t, PathMatchesManifest(dir.Path(), NewManifest(t)))
 }
 
 func TestEqualDirectoryHasWithExtraFiles(t *testing.T) {
@@ -71,7 +70,7 @@ func TestEqualDirectoryHasWithExtraFiles(t *testing.T) {
 		WithFile("extra1", "content"))
 	defer dir.Remove()
 
-	manifest := Expected(t, WithFile("file1", "content"))
+	manifest := NewManifest(t, WithFile("file1", "content"))
 	result := PathMatchesManifest(dir.Path(), manifest)
 	assertNotNil(t, result)
 	expected := fmtExpected(`directory %s does not match the manifest:
@@ -91,7 +90,7 @@ func TestEqualWithMatchAnyFileContent(t *testing.T) {
 		WithFile("data", "this is some data"))
 	defer dir.Remove()
 
-	expected := Expected(t,
+	expected := NewManifest(t,
 		WithFile("data", "different content", MatchAnyFileContent()))
 	assert.Assert(t, PathMatchesManifest(dir.Path(), expected))
 }
@@ -101,7 +100,7 @@ func TestEqualWithFileContent(t *testing.T) {
 		WithFile("file1", "line1\nline2\nline3"))
 	defer dir.Remove()
 
-	manifest := Expected(t,
+	manifest := NewManifest(t,
 		WithFile("file1", "line2\nline3"))
 
 	result := PathMatchesManifest(dir.Path(), manifest)
@@ -123,7 +122,7 @@ func TestEqualWithMatchContentIgnoreCarriageReturn(t *testing.T) {
 		WithFile("file1", "line1\r\nline2"))
 	defer dir.Remove()
 
-	manifest := Expected(t,
+	manifest := NewManifest(t,
 		WithFile("file1", "line1\nline2", MatchContentIgnoreCarriageReturn()))
 
 	result := PathMatchesManifest(dir.Path(), manifest)
@@ -137,7 +136,7 @@ func TestEqualDirectoryWithMatchExtraFiles(t *testing.T) {
 		WithFile("extra", "some content"))
 	defer dir.Remove()
 
-	expected := Expected(t, file1, MatchExtraFiles())
+	expected := NewManifest(t, file1, MatchExtraFiles())
 	assert.Assert(t, PathMatchesManifest(dir.Path(), expected))
 }
 
@@ -148,7 +147,7 @@ func TestEqualManyFailures(t *testing.T) {
 		WithSymlink("sym1", "extra"))
 	defer dir.Remove()
 
-	manifest := Expected(t,
+	manifest := NewManifest(t,
 		WithDir("subdir",
 			WithFile("somefile", "")),
 		WithFile("file1", "not the\nsame in both"))
@@ -182,7 +181,7 @@ func TestMatchAnyFileMode(t *testing.T) {
 			WithMode(0777)))
 	defer dir.Remove()
 
-	expected := Expected(t,
+	expected := NewManifest(t,
 		WithFile("data", "content", MatchAnyFileMode()))
 	assert.Assert(t, PathMatchesManifest(dir.Path(), expected))
 }
@@ -193,19 +192,19 @@ func TestMatchFileContent(t *testing.T) {
 	defer dir.Remove()
 
 	t.Run("content matches", func(t *testing.T) {
-		matcher := func(b []byte) CompareResult {
-			return is.ResultSuccess
+		matcher := func(b []byte) error {
+			return nil
 		}
-		manifest := Expected(t,
+		manifest := NewManifest(t,
 			WithFile("data", "different", MatchFileContent(matcher)))
 		assert.Assert(t, PathMatchesManifest(dir.Path(), manifest))
 	})
 
 	t.Run("content does not match", func(t *testing.T) {
-		matcher := func(b []byte) CompareResult {
-			return is.ResultFailure("data content differs from expected")
+		matcher := func(b []byte) error {
+			return fmt.Errorf("data content differs from expected")
 		}
-		manifest := Expected(t,
+		manifest := NewManifest(t,
 			WithFile("data", "content", MatchFileContent(matcher)))
 		result := PathMatchesManifest(dir.Path(), manifest)
 		assertNotNil(t, result)
@@ -226,7 +225,7 @@ func TestMatchExtraFilesGlob(t *testing.T) {
 	defer dir.Remove()
 
 	t.Run("matching globs", func(t *testing.T) {
-		manifest := Expected(t,
+		manifest := NewManifest(t,
 			MatchFilesWithGlob("*.go", MatchAnyFileMode(), MatchAnyFileContent()),
 			MatchFilesWithGlob("*.yml", MatchAnyFileMode(), MatchAnyFileContent()))
 		assert.Assert(t, PathMatchesManifest(dir.Path(), manifest))
@@ -236,7 +235,7 @@ func TestMatchExtraFilesGlob(t *testing.T) {
 		if runtime.GOOS == "windows" {
 			t.Skip("expect mode does not match on windows")
 		}
-		manifest := Expected(t,
+		manifest := NewManifest(t,
 			MatchFilesWithGlob("*.go", MatchAnyFileMode(), MatchAnyFileContent()),
 			MatchFilesWithGlob("*.yml", MatchAnyFileContent(), WithMode(0700)))
 
@@ -251,7 +250,7 @@ conf.yml
 	})
 
 	t.Run("matching partial glob", func(t *testing.T) {
-		manifest := Expected(t, MatchFilesWithGlob("*.go", MatchAnyFileMode(), MatchAnyFileContent()))
+		manifest := NewManifest(t, MatchFilesWithGlob("*.go", MatchAnyFileMode(), MatchAnyFileContent()))
 		result := PathMatchesManifest(dir.Path(), manifest)
 		assertNotNil(t, result)
 
@@ -263,7 +262,7 @@ conf.yml
 	})
 
 	t.Run("invalid glob", func(t *testing.T) {
-		manifest := Expected(t, MatchFilesWithGlob("[-x]"))
+		manifest := NewManifest(t, MatchFilesWithGlob("[-x]"))
 		result := PathMatchesManifest(dir.Path(), manifest)
 		assertNotNil(t, result)
 

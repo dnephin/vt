@@ -38,7 +38,7 @@ func TestNewDirWithOpsAndManifestEqual(t *testing.T) {
 		fs.WithSymlink("link1", dir.Join("file1")),
 		ops[4],
 	)
-	assert.Assert(t, fs.PathMatchesManifest(dir.Path(), fs.Expected(t, manifestOps...)))
+	assert.Assert(t, fs.PathMatchesManifest(dir.Path(), fs.NewManifest(t, manifestOps...)))
 }
 
 func TestNewFile(t *testing.T) {

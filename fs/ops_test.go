@@ -16,7 +16,7 @@ func TestFromDir(t *testing.T) {
 	dir := fs.NewDir(t, "test-from-dir", fs.FromDir("testdata/copy-test"))
 	defer dir.Remove()
 
-	expected := fs.Expected(t,
+	expected := fs.NewManifest(t,
 		fs.WithFile("1", "1\n"),
 		fs.WithDir("a",
 			fs.WithFile("1", "1\n"),
@@ -40,7 +40,7 @@ func TestFromDirSymlink(t *testing.T) {
 		link3 = filepath.Join(filepath.VolumeName(currentdir), link3)
 	}
 
-	expected := fs.Expected(t,
+	expected := fs.NewManifest(t,
 		fs.WithFile("1", "1\n"),
 		fs.WithDir("a",
 			fs.WithFile("1", "1\n"),
@@ -80,7 +80,7 @@ func TestApply(t *testing.T) {
 		defer tmpDir.Remove()
 		fs.Apply(t, tmpDir, fs.WithFile("file1", "contenta"))
 		fs.Apply(t, tmpDir, fs.WithFile("file2", "contentb"))
-		expected := fs.Expected(t,
+		expected := fs.NewManifest(t,
 			fs.WithFile("file1", "contenta"),
 			fs.WithFile("file2", "contentb"))
 		assert.Assert(t, fs.PathMatchesManifest(tmpDir.Path(), expected))
@@ -94,6 +94,6 @@ func TestWithReaderContent(t *testing.T) {
 			fs.WithReaderContent(strings.NewReader(content))),
 	)
 	defer dir.Remove()
-	expected := fs.Expected(t, fs.WithFile("1", content))
+	expected := fs.NewManifest(t, fs.WithFile("1", content))
 	assert.Assert(t, fs.PathMatchesManifest(dir.Path(), expected))
 }

@@ -77,10 +77,10 @@ func (p *directoryPath) AddDirectory(path string, ops ...PathOp) error {
 	return applyPathOps(exp, ops)
 }
 
-// Expected returns a [Manifest] with a directory structured created by ops. The
+// NewManifest returns a [Manifest] with a directory structured created by ops. The
 // [PathOp] operations are applied to the manifest as expectations of the
 // filesystem structure and properties.
-func Expected(t assert.TestingT, ops ...PathOp) Manifest {
+func NewManifest(t assert.TestingT, ops ...PathOp) Manifest {
 	if ht, ok := t.(helperT); ok {
 		ht.Helper()
 	}
@@ -160,18 +160,9 @@ func MatchExtraFiles() DirOp {
 	}
 }
 
-// CompareResult is the result of comparison.
-//
-// See [gotest.tools/v3/assert/cmp.StringResult] for a convenient implementation of
-// this interface.
-type CompareResult interface {
-	Success() bool
-	FailureMessage() string
-}
-
 // MatchFileContent is a [PathOp] that updates a [Manifest] to use the provided
 // function to determine if a file's content matches the expectation.
-func MatchFileContent(f func([]byte) CompareResult) FileOp {
+func MatchFileContent(f func([]byte) error) FileOp {
 	return func(path Path) error {
 		if m, ok := path.(*filePath); ok {
 			m.file.compareContentFunc = f

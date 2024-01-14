@@ -100,8 +100,8 @@ func eqFile(x, y *file) []problem {
 
 	if x.compareContentFunc != nil {
 		r := x.compareContentFunc(yContent)
-		if !r.Success() {
-			p = append(p, existenceProblem("content", r.FailureMessage()))
+		if r != nil {
+			p = append(p, existenceProblem("content", r.Error()))
 		}
 		return p
 	}

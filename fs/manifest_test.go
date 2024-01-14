@@ -79,7 +79,7 @@ func TestSymlinks(t *testing.T) {
 		WithFile("foo.txt", "foo"),
 		WithSymlink("foo.link", "foo.txt"))
 	defer rootDirectory.Remove()
-	expected := Expected(t,
+	expected := NewManifest(t,
 		WithFile("foo.txt", "foo"),
 		WithSymlink("foo.link", rootDirectory.Join("foo.txt")))
 	assert.Assert(t, PathMatchesManifest(rootDirectory.Path(), expected))

@@ -45,7 +45,7 @@ func ExampleWithDir() {
 // expected properties.
 func ExampleEqual() {
 	path := operationWhichCreatesFiles()
-	expected := fs.Expected(t,
+	expected := fs.NewManifest(t,
 		fs.WithFile("one", "",
 			fs.WithBytes([]byte("content")),
 			fs.WithMode(0600)),
