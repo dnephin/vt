@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	"gotest.tools/v3/assert"
 )
 
 const defaultFileMode = 0644
@@ -158,11 +156,13 @@ func WithDir(name string, ops ...PathOp) DirOp {
 }
 
 // Apply the PathOps to the [File]
-func Apply(t assert.TestingT, path Path, ops ...PathOp) {
+func Apply(t TestingT, path Path, ops ...PathOp) {
 	if ht, ok := t.(helperT); ok {
 		ht.Helper()
 	}
-	assert.NilError(t, applyPathOps(path, ops))
+	if err := applyPathOps(path, ops); err != nil {
+		t.Fatalf("failed to apply operations: %v", err)
+	}
 }
 
 func applyPathOps(path Path, ops []PathOp) error {

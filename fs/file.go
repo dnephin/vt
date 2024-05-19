@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/dnephin/vt/internal/cleanup"
-	"gotest.tools/v3/assert"
 )
 
 // Path objects return their filesystem path. Path may be implemented by a
@@ -36,24 +35,35 @@ type helperT interface {
 	Helper()
 }
 
+type TestingT interface {
+	Fatalf(string, ...any)
+	Log(...interface{})
+}
+
 // NewFile creates a new file in a temporary directory using prefix as part of
 // the filename. The PathOps are applied to the before returning the File.
 //
 // When used with Go 1.14+ the file will be automatically removed when the test
 // ends, unless the TEST_NOCLEANUP env var is set to true.
-func NewFile(t assert.TestingT, prefix string, ops ...PathOp) *File {
+func NewFile(t TestingT, prefix string, ops ...PathOp) *File {
 	if ht, ok := t.(helperT); ok {
 		ht.Helper()
 	}
 	tempfile, err := os.CreateTemp("", cleanPrefix(prefix)+"-")
-	assert.NilError(t, err)
+	if err != nil {
+		t.Fatalf("failed to create temp file: %v", err)
+	}
 
-	file := &File{path: tempfile.Name()}
-	cleanup.Cleanup(t, file.Remove)
+	fh := &File{path: tempfile.Name()}
+	cleanup.Cleanup(t, fh.Remove)
 
-	assert.NilError(t, tempfile.Close())
-	assert.NilError(t, applyPathOps(file, ops))
-	return file
+	if err := tempfile.Close(); err != nil {
+		t.Fatalf("failed to close temp file: %v", err)
+	}
+	if err := applyPathOps(fh, ops); err != nil {
+		t.Fatalf("failed to apply operations to file: %v", err)
+	}
+	return fh
 }
 
 func cleanPrefix(prefix string) string {
@@ -84,16 +94,20 @@ type Dir struct {
 //
 // When used with Go 1.14+ the directory will be automatically removed when the test
 // ends, unless the TEST_NOCLEANUP env var is set to true.
-func NewDir(t assert.TestingT, prefix string, ops ...PathOp) *Dir {
+func NewDir(t TestingT, prefix string, ops ...PathOp) *Dir {
 	if ht, ok := t.(helperT); ok {
 		ht.Helper()
 	}
 	path, err := os.MkdirTemp("", cleanPrefix(prefix)+"-")
-	assert.NilError(t, err)
+	if err != nil {
+		t.Fatalf("failed to make temp dir: %v", err)
+	}
 	dir := &Dir{path: path}
 	cleanup.Cleanup(t, dir.Remove)
 
-	assert.NilError(t, applyPathOps(dir, ops))
+	if err := applyPathOps(dir, ops); err != nil {
+		t.Fatalf("failed to apply operations: %v", err)
+	}
 	return dir
 }
 
@@ -118,12 +132,14 @@ func (d *Dir) Join(parts ...string) string {
 // DirFromPath can be used with Apply to modify an existing directory.
 //
 // If the path does not already exist, use NewDir instead.
-func DirFromPath(t assert.TestingT, path string, ops ...PathOp) *Dir {
+func DirFromPath(t TestingT, path string, ops ...PathOp) *Dir {
 	if ht, ok := t.(helperT); ok {
 		ht.Helper()
 	}
 
 	dir := &Dir{path: path}
-	assert.NilError(t, applyPathOps(dir, ops))
+	if err := applyPathOps(dir, ops); err != nil {
+		t.Fatalf("failed to apply operations: %v", err)
+	}
 	return dir
 }
