@@ -5,30 +5,37 @@ import (
 	"testing"
 
 	"github.com/dnephin/vt/fs"
-	"gotest.tools/v3/assert"
-	"gotest.tools/v3/assert/cmp"
+	"github.com/dnephin/vt/tma"
 )
 
 var t = &testing.T{}
 
-// Create a temporary directory which contains a single file
+// Create a temporary directory that contains a single file
 func ExampleNewDir() {
-	dir := fs.NewDir(t, "test-name", fs.WithFile("file1", "content\n"))
-	defer dir.Remove()
+	dir := fs.NewDir(t, "test-name",
+		fs.WithFile("file1", "content\n"))
 
 	files, err := os.ReadDir(dir.Path())
-	assert.NilError(t, err)
-	assert.Assert(t, cmp.Len(files, 0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := len(files), 1; got != want {
+		t.Fatal(tma.GotWant(got, want))
+	}
 }
 
 // Create a new file with some content
 func ExampleNewFile() {
-	file := fs.NewFile(t, "test-name", fs.WithContent("content\n"), fs.AsUser(0, 0))
-	defer file.Remove()
+	file := fs.NewFile(t, "test-name",
+		fs.WithContent("content\n"), fs.AsUser(0, 0))
 
 	content, err := os.ReadFile(file.Path())
-	assert.NilError(t, err)
-	assert.Equal(t, "content\n", content)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := string(content), "content\n"; got != want {
+		t.Fatal(tma.GotWant(got, want))
+	}
 }
 
 // Create a directory and subdirectory with files
@@ -38,7 +45,7 @@ func ExampleWithDir() {
 			fs.WithMode(os.FileMode(0700)),
 			fs.WithFile("file1", "content\n")),
 	)
-	defer dir.Remove()
+	_ = dir
 }
 
 // Test that a directory contains the expected files, and all the files have the
@@ -52,7 +59,9 @@ func ExampleEqual() {
 		fs.WithDir("data",
 			fs.WithFile("config", "", fs.MatchAnyFileContent())))
 
-	assert.Assert(t, fs.PathMatchesManifest(path, expected))
+	if err := fs.PathMatchesManifest(path, expected); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func operationWhichCreatesFiles() string {
@@ -62,7 +71,5 @@ func operationWhichCreatesFiles() string {
 // Add a file to an existing directory
 func ExampleApply() {
 	dir := fs.NewDir(t, "test-name")
-	defer dir.Remove()
-
 	fs.Apply(t, dir, fs.WithFile("file1", "content\n"))
 }

@@ -5,8 +5,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-
-	"gotest.tools/v3/assert"
 )
 
 // Manifest stores the expected structure and properties of files and directories
@@ -58,13 +56,15 @@ type dirEntry interface {
 // ManifestFromDir creates a [Manifest] by reading the directory at path. The
 // manifest stores the structure and properties of files in the directory.
 // ManifestFromDir can be used with [PathMatchesManifest] to compare two directories.
-func ManifestFromDir(t assert.TestingT, path string) Manifest {
+func ManifestFromDir(t TestingT, path string) Manifest {
 	if ht, ok := t.(helperT); ok {
 		ht.Helper()
 	}
 
 	manifest, err := manifestFromDir(path)
-	assert.NilError(t, err)
+	if err != nil {
+		t.Fatalf("failed to create manifest: %v", err)
+	}
 	return manifest
 }
 

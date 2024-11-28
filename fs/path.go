@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"io"
 	"os"
-
-	"gotest.tools/v3/assert"
 )
 
 // resourcePath is an adaptor for resources so they can be used as a Path
@@ -80,14 +78,16 @@ func (p *directoryPath) AddDirectory(path string, ops ...PathOp) error {
 // NewManifest returns a [Manifest] with a directory structured created by ops. The
 // [PathOp] operations are applied to the manifest as expectations of the
 // filesystem structure and properties.
-func NewManifest(t assert.TestingT, ops ...PathOp) Manifest {
+func NewManifest(t TestingT, ops ...PathOp) Manifest {
 	if ht, ok := t.(helperT); ok {
 		ht.Helper()
 	}
 
 	newDir := newDirectoryWithDefaults()
 	e := &directoryPath{directory: newDir}
-	assert.NilError(t, applyPathOps(e, ops))
+	if err := applyPathOps(e, ops); err != nil {
+		t.Fatalf("failed to apply operations to manifest: %v", err)
+	}
 	return Manifest{root: newDir}
 }
 
