@@ -14,6 +14,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/dnephin/vt/internal/format"
 )
@@ -50,10 +52,20 @@ func MatchStringToFile(got string, wantFilename string) error {
 		From: "got",
 		To:   "want",
 	})
-	msg := "%v\nRun 'go test . -update=%v' to update %s to the new value."
-	return fmt.Errorf(msg, diff, gotHash, wantFilename)
+	pkg, _ := currentTestName()
+	msg := "(-got +want):\n%v\nRun 'go test %v -update=%v' to update %s to the new value."
+	return fmt.Errorf(msg, diff, pkg, gotHash, wantFilename)
 }
 
 func hash(got string) string {
 	return fmt.Sprintf("%x", sha256.Sum256([]byte(got)))[:10]
+}
+
+func currentTestName() (pkg string, test string) {
+	pc, _, _, _ := runtime.Caller(2) // currentTestName + MatchStringToFile
+	name := runtime.FuncForPC(pc).Name()
+	if i := strings.LastIndex(name, "."); i >= 0 {
+		return name[:i], name[i+1:]
+	}
+	return "", ""
 }
