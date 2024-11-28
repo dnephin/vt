@@ -11,7 +11,9 @@ package golden
 import (
 	"bytes"
 	"crypto/sha256"
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -29,6 +31,9 @@ import (
 func MatchStringToFile(got string, wantFilename string) error {
 	want, err := os.ReadFile(wantFilename)
 	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) && update.Requested(hash(got)) {
+			return updateFile(got, wantFilename)
+		}
 		return fmt.Errorf("read wantFilename: %w", err)
 	}
 	if bytes.Equal([]byte(got), want) {
@@ -37,13 +42,7 @@ func MatchStringToFile(got string, wantFilename string) error {
 
 	gotHash := hash(got)
 	if update.Requested(gotHash) {
-		if dir := filepath.Dir(wantFilename); dir != "." {
-			_ = os.MkdirAll(dir, 0755)
-		}
-		if err := os.WriteFile(wantFilename, []byte(got), 0644); err != nil {
-			return fmt.Errorf("write wantfilename: %v", err)
-		}
-		return nil
+		return updateFile(got, wantFilename)
 	}
 
 	diff := format.UnifiedDiff(format.DiffConfig{
@@ -59,6 +58,16 @@ func MatchStringToFile(got string, wantFilename string) error {
 
 func hash(got string) string {
 	return fmt.Sprintf("%x", sha256.Sum256([]byte(got)))[:10]
+}
+
+func updateFile(got string, wantFilename string) error {
+	if dir := filepath.Dir(wantFilename); dir != "." {
+		_ = os.MkdirAll(dir, 0o755)
+	}
+	if err := os.WriteFile(wantFilename, []byte(got), 0644); err != nil {
+		return fmt.Errorf("write wantfilename: %v", err)
+	}
+	return nil
 }
 
 func currentTestName() (pkg string, test string) {
