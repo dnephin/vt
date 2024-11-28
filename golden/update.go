@@ -3,6 +3,7 @@ package golden
 import (
 	"flag"
 	"fmt"
+	"os"
 )
 
 var update updateValue
@@ -13,6 +14,10 @@ func init() {
 
 type updateValue string
 
+func (u *updateValue) IsBoolFlag() bool {
+	return true
+}
+
 func (u *updateValue) String() string {
 	if u == nil {
 		return ""
@@ -21,6 +26,9 @@ func (u *updateValue) String() string {
 }
 
 func (u *updateValue) Set(v string) error {
+	if v == "true" {
+		v = os.Getenv("GOLDEN_UPDATE")
+	}
 	switch v {
 	case "no":
 		// used internally for testing
